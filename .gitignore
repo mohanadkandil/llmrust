@@ -1,0 +1,18 @@
+# Rust / Cargo
+target/
+**/target/
+
+# Rustfmt backup files
+**/*.rs.bk
+
+# Rust Analyzer / language servers
+rust-project.json
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+/target
