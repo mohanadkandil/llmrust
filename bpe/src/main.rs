@@ -52,27 +52,27 @@ fn main() -> std::io::Result<()> {
         // Update for next round
         ids = new_ids;
         next_id += 1;
+    }
 
-        for i in 0..256 {
-            vocab.insert(i as u32, vec![i as u8]);
-        }
-        // build vocab
-        let mut sorted_merges: Vec<_> = merges.iter().collect();
-        sorted_merges.sort_by_key(|(key, _)| key.0);
+    for i in 0..256 {
+        vocab.insert(i as u32, vec![i as u8]);
+    }
+    // build vocab
+    let mut sorted_merges: Vec<_> = merges.iter().collect();
+    sorted_merges.sort_by_key(|(key, _)| key.0);
 
-        for ((p1, p2), new_id) in sorted_merges {
-            let mut combined = vocab.get(p1).unwrap().clone();
-            combined.extend(vocab.get(p2).unwrap());
-            vocab.insert(*new_id, combined);
-        }
+    for ((p1, p2), new_id) in sorted_merges {
+        let mut combined = vocab.get(p1).unwrap().clone();
+        combined.extend(vocab.get(p2).unwrap());
+        vocab.insert(*new_id, combined);
+    }
 
-        // print the result
-        println!("--- TOP LEARNED TOKENS ---");
-        for i in 256..next_id {
-            if let Some(bytes) = vocab.get(&i) {
-                let s = String::from_utf8_lossy(bytes);
-                println!("ID {}: {:?}", i, s);
-            }
+    // print the result
+    println!("--- TOP LEARNED TOKENS ---");
+    for i in 256..next_id {
+        if let Some(bytes) = vocab.get(&i) {
+            let s = String::from_utf8_lossy(bytes);
+            println!("ID {}: {:?}", i, s);
         }
     }
 
