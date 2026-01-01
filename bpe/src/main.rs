@@ -97,6 +97,8 @@ fn main() -> std::io::Result<()> {
     // encode the text
     let encoded = encode("thin", &merges);
     println!("Encoded: {:?}", encoded);
+    println!("Decoded: {:?}", decode(&encoded, &vocab));
+    println!("Original: {:?}", "thin");
 
     Ok(())
 }
@@ -106,7 +108,6 @@ fn encode(text: &str, merges: &HashMap<(u32, u32), u32>) -> Vec<u32> {
     let mut ids: Vec<u32> = text.as_bytes().iter().map(|&b| b as u32).collect();
 
     println!("Original: {:?}", text);
-    println!("Encoded: {:?}", ids);
 
     // order the rules by their id with respect to new id and asecnding order
     let mut rules: Vec<_> = merges.iter().collect();
@@ -128,4 +129,14 @@ fn encode(text: &str, merges: &HashMap<(u32, u32), u32>) -> Vec<u32> {
         ids = compressed;
     }
     ids
+}
+
+pub fn decode(ids: &[u32], vocab: &HashMap<u32, Vec<u8>>) -> String {
+    let mut bytes = Vec::new();
+    for id in ids {
+        if let Some(token_bytes) = vocab.get(id) {
+            bytes.extend(token_bytes);
+        }
+    }
+    String::from_utf8_lossy(&bytes).to_string()
 }
