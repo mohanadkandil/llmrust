@@ -2,6 +2,24 @@ use std::collections::HashMap;
 use std::fs::read;
 use std::vec::Vec;
 
+pub struct Tokenizer {
+    pub merges: HashMap<(u32, u32), u32>,
+    pub vocab: HashMap<u32, Vec<u8>>,
+}
+
+impl Tokenizer {
+    pub fn new() -> Self {
+        let mut vocab = HashMap::new();
+        for i in 0..256 {
+            vocab.insert(i as u32, vec![i as u8]);
+        }
+        Self {
+            merges: HashMap::new(),
+            vocab,
+        }
+    }
+}
+
 fn main() -> std::io::Result<()> {
     let data = read("src/input.txt")?;
     let mut ids: Vec<u32> = data.into_iter().map(|b| b as u32).collect();
@@ -76,5 +94,38 @@ fn main() -> std::io::Result<()> {
         }
     }
 
+    // encode the text
+    let encoded = encode("thin", &merges);
+    println!("Encoded: {:?}", encoded);
+
     Ok(())
+}
+
+fn encode(text: &str, merges: &HashMap<(u32, u32), u32>) -> Vec<u32> {
+    // convert the input text into a vector of u32
+    let mut ids: Vec<u32> = text.as_bytes().iter().map(|&b| b as u32).collect();
+
+    println!("Original: {:?}", text);
+    println!("Encoded: {:?}", ids);
+
+    // order the rules by their id with respect to new id and asecnding order
+    let mut rules: Vec<_> = merges.iter().collect();
+    rules.sort_by_key(|&(_, &id)| id);
+
+    for (pair, new_id) in rules {
+        let mut compressed = Vec::new();
+        let mut i = 0;
+
+        while i < ids.len() {
+            if i < ids.len() - 1 && ids[i] == pair.0 && ids[i + 1] == pair.1 {
+                compressed.push(*new_id);
+                i += 2;
+            } else {
+                compressed.push(ids[i]);
+                i += 1;
+            }
+        }
+        ids = compressed;
+    }
+    ids
 }
